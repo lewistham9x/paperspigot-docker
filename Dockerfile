@@ -28,7 +28,7 @@ WORKDIR ${MINECRAFT_BUILD_PATH}
 ##########################
 ### Download paperclip ###
 ##########################
-COPY ${PAPER_DOWNLOAD_URL} paper.jar
+ADD ${PAPER_DOWNLOAD_URL} paper.jar
 
 ############
 ### User ###
@@ -94,7 +94,7 @@ COPY --from=build /opt/minecraft/paper.jar ${SERVER_PATH}/
 ######################
 ### Obtain scripts ###
 ######################
-COPY scripts/docker-entrypoint.sh docker-entrypoint.sh
+ADD scripts/docker-entrypoint.sh docker-entrypoint.sh
 RUN chmod +x docker-entrypoint.sh
 
 #####################
