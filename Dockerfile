@@ -14,11 +14,11 @@ LABEL maintainer="lekt8"
 #################
 ### Arguments ###
 #################
+ARG PAPER_VERSION=1.14.4 
+ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 ARG MINECRAFT_BUILD_USER=minecraft-build
 ENV MINECRAFT_BUILD_PATH=/opt/minecraft
-ENV PAPER_VERSION=1.14.4 
 # ENV used over ARG to define version to download within ENV without having to creating entirely new container
-ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 
 #########################
 ### Working directory ###
