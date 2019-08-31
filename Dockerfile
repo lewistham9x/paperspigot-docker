@@ -6,19 +6,19 @@ ARG JAVA_VERSION=11
 ################################
 FROM openjdk:${JAVA_VERSION} AS build
 
-#####################################
-### Maintained by Felix Klauke    ###
-### Contact: info@felix-klauke.de ###
-#####################################
-LABEL maintainer="Felix Klauke <info@felix-klauke.de>"
+###########################
+### Maintained by lekt8 ###
+###########################
+LABEL maintainer="lekt8"
 
 #################
 ### Arguments ###
 #################
-ARG PAPER_VERSION=1.14.4
-ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 ARG MINECRAFT_BUILD_USER=minecraft-build
 ENV MINECRAFT_BUILD_PATH=/opt/minecraft
+ENV PAPER_VERSION=1.14.4 
+# ENV used over ARG to define version to download within ENV without having to creating entirely new container
+ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 
 #########################
 ### Working directory ###
@@ -54,7 +54,7 @@ FROM openjdk:${JAVA_VERSION} AS runtime
 ##########################
 ### Environment & ARGS ###
 ##########################
-ENV MINECRAFT_PATH=/opt/minecraft
+ARG MINECRAFT_PATH=/opt/minecraft
 ENV SERVER_PATH=${MINECRAFT_PATH}/server
 ENV DATA_PATH=${MINECRAFT_PATH}/data
 ENV LOGS_PATH=${MINECRAFT_PATH}/logs
@@ -62,8 +62,8 @@ ENV CONFIG_PATH=${MINECRAFT_PATH}/config
 ENV WORLDS_PATH=${MINECRAFT_PATH}/worlds
 ENV PLUGINS_PATH=${MINECRAFT_PATH}/plugins
 ENV PROPERTIES_LOCATION=${CONFIG_PATH}/server.properties
-ENV JAVA_HEAP_SIZE=4G
-ENV JAVA_ARGS="-server -Dcom.mojang.eula.agree=true"
+ENV RAM=2G
+ENV JAVA_ARGS="-XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs"
 ENV SPIGOT_ARGS="--nojline"
 ENV PAPER_ARGS=""
 
@@ -120,7 +120,9 @@ RUN ln -s $PLUGINS_PATH $SERVER_PATH/plugins && \
     ln -s $DATA_PATH/permissions.yml $SERVER_PATH/permissions.yml && \
     ln -s $DATA_PATH/whitelist.json $SERVER_PATH/whitelist.json && \
     # Create symlink for logs
-    ln -s $LOGS_PATH $SERVER_PATH/logs
+    ln -s $LOGS_PATH $SERVER_PATH/logs && \
+    echo "eula=true" > $SERVER_PATH/eula.txt
+
 
 ###############
 ### Volumes ###
