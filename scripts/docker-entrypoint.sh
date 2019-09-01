@@ -22,14 +22,40 @@ setup_github(){
 
 	else
 	  echo "Creating New Repository"
-	  curl -u ${GITHUB_TOKEN}:"" https://api.github.com/user/repos -d "{\"name\":\"${GITHUB_REPO_NAME}\"}"  
+		# Create a Git Repository
+		GITHUB_TOKEN=${GITHUB_TOKEN} hub init
+		GITHUB_TOKEN=${GITHUB_TOKEN} hub create ${GITHUB_REPO_NAME} | tail -n 1 > ${CONFIG_PATH}/git_repo.txt
+
+		# Setup .gitignore to ignore sensitive files/folders
+		echo ".DS_Store" >> .gitignore
+		echo "" >> .gitignore
+		echo "Ignoring sensitive files and folders" >> .gitignore
+		echo "/data" >> .gitignore
+		echo "/logs" >> .gitignore
+		echo "/worlds" >> .gitignore
+		echo "*.db*" >> .gitignore
+		echo "*.sql*" >> .gitignore
+
+		# Setup README.md
+		echo "# ${GITHUB_REPO_NAME}" >> README.md
+		echo "* * *" >> README.md
+		echo "## About" >> README.md
+		echo "" >> README.md
+		echo "This repository coexists together with the ${GITHUB_REPO_NAME} Paper Spigot server. " >> README.md
+		echo "" >> README.md
+		echo "All changes made to configurations stored on this repository will be reflected onto the server upon its next restart." >> README.md
+		echo "## tl;dr" >> README.md
+		echo "lekt8 is da best" >> README.md
+
+		# Initial Commit
+		git add .
+		git commit -am "Initial Commit"
+		GITHUB_TOKEN=${GITHUB_TOKEN} hub push origin master
 	fi
+}
 
-
-  # Create a GitHub Repository
-
-  git init
-
+update_github() {
+	GITHUB_TOKEN=${GITHUB_TOKEN} hub sync
 }
 
 run_paper() {
@@ -40,7 +66,13 @@ run_paper() {
 case "$1" in
     serve)
         shift 1
+        setup_github
+        update_github
         run_paper
+        ;;
+    reload)
+        shift 1
+        update_github
         ;;
     *)
         exec "$@"
