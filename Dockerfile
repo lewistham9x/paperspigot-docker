@@ -14,11 +14,20 @@ LABEL maintainer="lekt8"
 #################
 ### Arguments ###
 #################
+
 ARG PAPER_VERSION=1.14.4 
 ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 ARG MINECRAFT_BUILD_USER=minecraft-build
 ENV MINECRAFT_BUILD_PATH=/opt/minecraft
-# ENV used over ARG to define version to download within ENV without having to creating entirely new container
+
+#################################################################################################
+### https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line ###
+### Requires repo and admin:public key permissions
+#################################################################################################
+
+ENV GITHUB_REPO_NAME=papermc-server
+ENV GITHUB_TOKEN=6969696969696969fc36c533ea3d5c711426bf9a93
+ARG KEY_NAME=paper-git@docker
 
 #########################
 ### Working directory ###
@@ -29,6 +38,11 @@ WORKDIR ${MINECRAFT_BUILD_PATH}
 ### Download paperclip ###
 ##########################
 ADD ${PAPER_DOWNLOAD_URL} paper.jar
+
+####################
+### Setup GitHub ###
+####################
+RUN apt-get update && apt-get install -y hub
 
 ############
 ### User ###
