@@ -97,10 +97,8 @@ COPY --from=build /opt/minecraft/paper.jar ${SERVER_PATH}/
 ADD scripts/docker-entrypoint.sh docker-entrypoint.sh
 RUN chmod +x docker-entrypoint.sh
 
-#####################
-### Obtain Screen ###
-#####################
-RUN apt-get update && apt-get install -y screen 
+ADD scripts/start.sh start.sh
+RUN chmod +x start.sh
 
 ############
 ### User ###
