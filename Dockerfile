@@ -129,9 +129,10 @@ USER minecraft
 #########################
 ### Setup environment ###
 #########################
-# !!!Removed Create symlink for plugin volume as hotfix for some plugins who hard code their directories
-# Create symlink for persistent data
-RUN ln -s $DATA_PATH/banned-ips.json $SERVER_PATH/banned-ips.json && \
+# Create symlink for plugin volume as hotfix for some plugins who hard code their directories
+RUN ln -s $PLUGINS_PATH $SERVER_PATH/plugins && \
+    # Create symlink for persistent data
+    ln -s $DATA_PATH/banned-ips.json $SERVER_PATH/banned-ips.json && \
     ln -s $DATA_PATH/banned-players.json $SERVER_PATH/banned-players.json && \
     ln -s $DATA_PATH/help.yml $SERVER_PATH/help.yml && \
     ln -s $DATA_PATH/ops.json $SERVER_PATH/ops.json && \
