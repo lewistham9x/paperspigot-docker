@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+   
 java -jar $JAVA_ARGS \
   -Xmx$RAM -Xms$RAM \
   $SERVER_PATH/paper.jar \

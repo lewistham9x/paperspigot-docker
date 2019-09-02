@@ -38,11 +38,12 @@ WORKDIR ${MINECRAFT_BUILD_PATH}
 ### Download paperclip ###
 ##########################
 ADD ${PAPER_DOWNLOAD_URL} paper.jar
+ADD https://github.com/github/hub/releases/download/v2.12.3/hub-linux-amd64-2.12.3.tgz hub.tgz
 
 ####################
 ### Setup GitHub ###
 ####################
-RUN apt-get update && apt-get install -y hub
+RUN tar -C ${MINECRAFT_BUILD_PATH} -xzf hub.tgz && rm hub.tgz && mv ${MINECRAFT_BUILD_PATH}/hub* ${MINECRAFT_BUILD_PATH}/hub
 
 ############
 ### User ###
@@ -76,7 +77,7 @@ ENV CONFIG_PATH=${MINECRAFT_PATH}/config
 ENV WORLDS_PATH=${MINECRAFT_PATH}/worlds
 ENV PLUGINS_PATH=${MINECRAFT_PATH}/plugins
 ENV PROPERTIES_LOCATION=${CONFIG_PATH}/server.properties
-ENV RAM=2G
+ENV RAM=1G
 ENV JAVA_ARGS="-XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs"
 ENV SPIGOT_ARGS="--nojline"
 ENV PAPER_ARGS=""
@@ -103,7 +104,8 @@ WORKDIR ${SERVER_PATH}
 ###########################################
 ### Obtain runable jar from build stage ###
 ###########################################
-COPY --from=build /opt/minecraft/paper.jar ${SERVER_PATH}/
+COPY --from=build ${MINECRAFT_PATH}/paper.jar ${SERVER_PATH}/
+COPY --from=build ${MINECRAFT_PATH}/hub ${SERVER_PATH}/hub
 
 ######################
 ### Obtain scripts ###
@@ -135,10 +137,13 @@ RUN ln -s $DATA_PATH/banned-ips.json $SERVER_PATH/banned-ips.json && \
     ln -s $DATA_PATH/ops.json $SERVER_PATH/ops.json && \
     ln -s $DATA_PATH/permissions.yml $SERVER_PATH/permissions.yml && \
     ln -s $DATA_PATH/whitelist.json $SERVER_PATH/whitelist.json && \
+    ln -s $DATA_PATH/mstore $SERVER_PATH/mstore && \
+    echo "eula=true" > $SERVER_PATH/eula.txt && \
     # Create symlink for logs
-    ln -s $LOGS_PATH $SERVER_PATH/logs && \
-    echo "eula=true" > $SERVER_PATH/eula.txt
+    ln -s $LOGS_PATH $SERVER_PATH/logs
 
+# Setup $HUB Command
+ENV HUB=${SERVER_PATH}/hub/bin/hub
 
 ###############
 ### Volumes ###

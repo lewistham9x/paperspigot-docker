@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 
-setup_github(){
+setup_github() {
 	# Start authentication agent
   eval $(ssh-agent -s) 
+  
   # Create SSH Key with no prompts or overwrite
   echo n | ssh-keygen -t rsa -b 4096 -C "${GITHUB_TOKEN}" -f ${DATA_PATH}/id_rsa -N "" > /dev/null
   ssh-add ${DATA_PATH}/id_rsa
@@ -14,7 +15,7 @@ setup_github(){
   cd ${MINECRAFT_PATH}
 
   # Clone repository
-	GITHUB_TOKEN=${GITHUB_TOKEN} hub clone ${GITHUB_REPO_NAME}
+	GITHUB_TOKEN=${GITHUB_TOKEN} $HUB clone ${GITHUB_REPO_NAME}
 
   # If Repository exists, else
   if [ $? -eq 0 ]; then
@@ -23,8 +24,8 @@ setup_github(){
 	else
 	  echo "Creating New Repository"
 		# Create a Git Repository
-		GITHUB_TOKEN=${GITHUB_TOKEN} hub init
-		GITHUB_TOKEN=${GITHUB_TOKEN} hub create ${GITHUB_REPO_NAME} | tail -n 1 > ${CONFIG_PATH}/git_repo.txt
+		GITHUB_TOKEN=${GITHUB_TOKEN} $HUB init
+		GITHUB_TOKEN=${GITHUB_TOKEN} $HUB create ${GITHUB_REPO_NAME} | tail -n 1 > ${CONFIG_PATH}/git_repo.txt
 
 		# Setup .gitignore to ignore sensitive files/folders
 		echo ".DS_Store" >> .gitignore
@@ -50,12 +51,15 @@ setup_github(){
 		# Initial Commit
 		git add .
 		git commit -am "Initial Commit"
-		GITHUB_TOKEN=${GITHUB_TOKEN} hub push origin master
+		GITHUB_TOKEN=${GITHUB_TOKEN} $HUB push origin master
 	fi
+
+	# Revert back to original working directory
+	cd ${SERVER_PATH}
 }
 
 update_github() {
-	GITHUB_TOKEN=${GITHUB_TOKEN} hub sync
+	GITHUB_TOKEN=${GITHUB_TOKEN} $HUB sync
 }
 
 run_paper() {
@@ -66,8 +70,8 @@ run_paper() {
 case "$1" in
     serve)
         shift 1
-        setup_github
-        update_github
+        #setup_github
+        #update_github
         run_paper
         ;;
     reload)
