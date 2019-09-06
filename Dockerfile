@@ -18,16 +18,12 @@ LABEL maintainer="lekt8"
 ARG PAPER_VERSION=1.14.4 
 ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 ARG MINECRAFT_BUILD_USER=minecraft-build
+
+ARG RCON_CLI_VER=1.4.6
+ARG MC_SERVER_RUNNER_VER=1.3.2
+ARG ARCH=amd64
+
 ENV MINECRAFT_BUILD_PATH=/opt/minecraft
-
-#################################################################################################
-### https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line ###
-### Requires repo and admin:public key permissions
-#################################################################################################
-
-ENV GITHUB_REPO_NAME=papermc-server
-ENV GITHUB_TOKEN=6969696969696969fc36c533ea3d5c711426bf9a93
-ARG KEY_NAME=paper-git@docker
 
 #########################
 ### Working directory ###
@@ -37,13 +33,15 @@ WORKDIR ${MINECRAFT_BUILD_PATH}
 ##########################
 ### Download paperclip ###
 ##########################
-ADD ${PAPER_DOWNLOAD_URL} paper.jar
-ADD https://github.com/github/hub/releases/download/v2.12.3/hub-linux-amd64-2.12.3.tgz hub.tgz
+ADD ${PAPER_DOWNLOAD_URL} ${MINECRAFT_BUILD_PATH}/paper.jar
 
-####################
-### Setup GitHub ###
-####################
-RUN tar -C ${MINECRAFT_BUILD_PATH} -xzf hub.tgz && rm hub.tgz && mv ${MINECRAFT_BUILD_PATH}/hub* ${MINECRAFT_BUILD_PATH}/hub
+ADD https://github.com/itzg/rcon-cli/releases/download/${RCON_CLI_VER}/rcon-cli_${RCON_CLI_VER}_linux_${ARCH}.tar.gz ${MINECRAFT_BUILD_PATH}/rcon-cli.tgz
+RUN tar -x -C ${MINECRAFT_BUILD_PATH} -f ${MINECRAFT_BUILD_PATH}/rcon-cli.tgz rcon-cli && \
+  rm ${MINECRAFT_BUILD_PATH}/rcon-cli.tgz
+
+ADD https://github.com/itzg/mc-server-runner/releases/download/${MC_SERVER_RUNNER_VER}/mc-server-runner_${MC_SERVER_RUNNER_VER}_linux_${ARCH}.tar.gz ${MINECRAFT_BUILD_PATH}/mc-server-runner.tgz
+RUN tar -x -C ${MINECRAFT_BUILD_PATH} -f ${MINECRAFT_BUILD_PATH}/mc-server-runner.tgz mc-server-runner && \
+  rm ${MINECRAFT_BUILD_PATH}/mc-server-runner.tgz
 
 ############
 ### User ###
@@ -105,16 +103,14 @@ WORKDIR ${SERVER_PATH}
 ### Obtain runable jar from build stage ###
 ###########################################
 COPY --from=build ${MINECRAFT_PATH}/paper.jar ${SERVER_PATH}/
-COPY --from=build ${MINECRAFT_PATH}/hub ${SERVER_PATH}/hub
+COPY --from=build ${MINECRAFT_PATH}/rcon-cli /usr/local/bin/
+COPY --from=build ${MINECRAFT_PATH}/mc-server-runner /usr/local/bin/
 
 ######################
 ### Obtain scripts ###
 ######################
 ADD scripts/docker-entrypoint.sh docker-entrypoint.sh
 RUN chmod +x docker-entrypoint.sh
-
-ADD scripts/start.sh start.sh
-RUN chmod +x start.sh
 
 ############
 ### User ###
