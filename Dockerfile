@@ -139,9 +139,6 @@ RUN ln -s $PLUGINS_PATH $SERVER_PATH/plugins && \
     # Create symlink for logs
     ln -s $LOGS_PATH $SERVER_PATH/logs
 
-# Setup $HUB Command
-ENV HUB=${SERVER_PATH}/hub/bin/hub
-
 ###############
 ### Volumes ###
 ###############
