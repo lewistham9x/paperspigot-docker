@@ -102,7 +102,7 @@ WORKDIR ${SERVER_PATH}
 ###########################################
 ### Obtain runable jar from build stage ###
 ###########################################
-COPY --from=build ${MINECRAFT_PATH}/paper.jar ${SERVER_PATH}/
+COPY --from=build ${MINECRAFT_PATH}/paper.jar ${SERVER_PATH}/paper.jar
 COPY --from=build ${MINECRAFT_PATH}/rcon-cli /usr/local/bin/
 COPY --from=build ${MINECRAFT_PATH}/mc-server-runner /usr/local/bin/
 
