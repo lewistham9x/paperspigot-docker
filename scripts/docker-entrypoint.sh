@@ -1,25 +1,16 @@
 #!/bin/bash
 set -e
 
-mcServerRunnerArgs="--stop-duration 60s"
+if [[ "$1" = 'serve' ]];  then
 
-run_paper() {
   # Start server
-	exec mc-server-runner ${mcServerRunnerArgs} java -jar $JAVA_ARGS \
-	  -Xmx$RAM -Xms$RAM \
-	  $SERVER_PATH/paper.jar \
-	  $SPIGOT_ARGS \
-	  --bukkit-settings $CONFIG_PATH/bukkit.yml --plugins $PLUGINS_PATH --world-dir $WORLDS_PATH --spigot-settings $CONFIG_PATH/spigot.yml --commands-settings $CONFIG_PATH/commands.yml --config $PROPERTIES_LOCATION \
-	  --paper-settings $CONFIG_PATH/paper.yml \
-	  $PAPER_ARGS
-}
+  java -jar $JAVA_ARGS \
+    -Xmx$RAM -Xms$RAM \
+    $SERVER_PATH/paper.jar \
+    $SPIGOT_ARGS \
+    --bukkit-settings $CONFIG_PATH/bukkit.yml --plugins $PLUGINS_PATH --world-dir $WORLDS_PATH --spigot-settings $CONFIG_PATH/spigot.yml --commands-settings $CONFIG_PATH/commands.yml --config $PROPERTIES_LOCATION \
+    --paper-settings $CONFIG_PATH/paper.yml \
+    $PAPER_ARGS
+fi
 
-case "$1" in
-    serve)
-        shift 1
-        run_paper
-        ;;
-    *)
-        exec "$@"
-esac
-
+exec "$@"

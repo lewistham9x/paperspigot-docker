@@ -6,23 +6,18 @@ ARG JAVA_VERSION=11
 ################################
 FROM openjdk:${JAVA_VERSION} AS build
 
-###########################
-### Maintained by lekt8 ###
-###########################
-LABEL maintainer="lekt8"
+#####################################
+### Maintained by Felix Klauke    ###
+### Contact: info@felix-klauke.de ###
+#####################################
+LABEL maintainer="Felix Klauke <info@felix-klauke.de>"
 
 #################
 ### Arguments ###
 #################
-
 ARG PAPER_VERSION=1.15
 ARG PAPER_DOWNLOAD_URL=https://papermc.io/api/v1/paper/${PAPER_VERSION}/latest/download
 ARG MINECRAFT_BUILD_USER=minecraft-build
-
-ARG RCON_CLI_VER=1.4.6
-ARG MC_SERVER_RUNNER_VER=1.3.2
-ARG ARCH=amd64
-
 ENV MINECRAFT_BUILD_PATH=/opt/minecraft
 
 #########################
@@ -33,15 +28,7 @@ WORKDIR ${MINECRAFT_BUILD_PATH}
 ##########################
 ### Download paperclip ###
 ##########################
-ADD ${PAPER_DOWNLOAD_URL} ${MINECRAFT_BUILD_PATH}/paper.jar
-
-ADD https://github.com/itzg/rcon-cli/releases/download/${RCON_CLI_VER}/rcon-cli_${RCON_CLI_VER}_linux_${ARCH}.tar.gz ${MINECRAFT_BUILD_PATH}/rcon-cli.tgz
-RUN tar -x -C ${MINECRAFT_BUILD_PATH} -f ${MINECRAFT_BUILD_PATH}/rcon-cli.tgz rcon-cli && \
-  rm ${MINECRAFT_BUILD_PATH}/rcon-cli.tgz
-
-ADD https://github.com/itzg/mc-server-runner/releases/download/${MC_SERVER_RUNNER_VER}/mc-server-runner_${MC_SERVER_RUNNER_VER}_linux_${ARCH}.tar.gz ${MINECRAFT_BUILD_PATH}/mc-server-runner.tgz
-RUN tar -x -C ${MINECRAFT_BUILD_PATH} -f ${MINECRAFT_BUILD_PATH}/mc-server-runner.tgz mc-server-runner && \
-  rm ${MINECRAFT_BUILD_PATH}/mc-server-runner.tgz
+ADD ${PAPER_DOWNLOAD_URL} paper.jar
 
 ############
 ### User ###
@@ -67,7 +54,7 @@ FROM openjdk:${JAVA_VERSION} AS runtime
 ##########################
 ### Environment & ARGS ###
 ##########################
-ARG MINECRAFT_PATH=/opt/minecraft
+ENV MINECRAFT_PATH=/opt/minecraft
 ENV SERVER_PATH=${MINECRAFT_PATH}/server
 ENV DATA_PATH=${MINECRAFT_PATH}/data
 ENV LOGS_PATH=${MINECRAFT_PATH}/logs
@@ -75,7 +62,7 @@ ENV CONFIG_PATH=${MINECRAFT_PATH}/config
 ENV WORLDS_PATH=${MINECRAFT_PATH}/worlds
 ENV PLUGINS_PATH=${MINECRAFT_PATH}/plugins
 ENV PROPERTIES_LOCATION=${CONFIG_PATH}/server.properties
-ENV RAM=6G
+ENV RAM=4G
 ENV JAVA_ARGS="-Duser.timezone=Asia/Singapore -DIGetItBroIDontNeedANewHost -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=mcflags.emc.gs"
 ENV SPIGOT_ARGS="--nojline"
 ENV PAPER_ARGS=""
@@ -102,9 +89,7 @@ WORKDIR ${SERVER_PATH}
 ###########################################
 ### Obtain runable jar from build stage ###
 ###########################################
-COPY --from=build ${MINECRAFT_PATH}/paper.jar ${SERVER_PATH}/paper.jar
-COPY --from=build ${MINECRAFT_PATH}/rcon-cli /usr/local/bin/
-COPY --from=build ${MINECRAFT_PATH}/mc-server-runner /usr/local/bin/
+COPY --from=build /opt/minecraft/paper.jar ${SERVER_PATH}/
 
 ######################
 ### Obtain scripts ###
@@ -134,8 +119,6 @@ RUN ln -s $PLUGINS_PATH $SERVER_PATH/plugins && \
     ln -s $DATA_PATH/ops.json $SERVER_PATH/ops.json && \
     ln -s $DATA_PATH/permissions.yml $SERVER_PATH/permissions.yml && \
     ln -s $DATA_PATH/whitelist.json $SERVER_PATH/whitelist.json && \
-    ln -s $DATA_PATH/mstore $SERVER_PATH/mstore && \
-    echo "eula=true" > $SERVER_PATH/eula.txt && \
     # Create symlink for logs
     ln -s $LOGS_PATH $SERVER_PATH/logs
 
